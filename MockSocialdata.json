@@ -1,0 +1,14 @@
+{
+    "socialdata":[
+        {
+            "id":"",
+            "created_at":"",
+            "geolocation":"",
+            "place_id":"",
+            "message":"",
+            "number_of_checkin":"",
+            "source":"",
+            "source_id":""
+        }
+    ]
+}
