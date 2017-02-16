@@ -3,13 +3,17 @@
 def findNextDense(table):
     allPeriod = 288
     last_length = len(table[-1])
-    
+
     if last_length == allPeriod:
         current_time = allPeriod-1
         next_time = 0    
+        if table[-1][current_time] == "-":
+            return table[-1][next_time] 
     else:
         current_time = last_length-1
-        next_time = current_time+1  
+        next_time = current_time+1
+        if table[-1][current_time] == "-":
+            return table[-2][next_time]  
     
     toFindMax = [sublist[current_time] for sublist in table]
     numberToFindMax = []
