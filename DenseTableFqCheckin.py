@@ -3,17 +3,11 @@ import json
 import datetime
 import csv
 
-weekDay = ['05-12-2016','06-12-2016','17-01-2017','18-01-2017','19-01-2017','23-01-2017','24-01-2017','25-01-2017','26-01-2017','30-01-2017','31-01-2017','01-02-2017','02-02-2017']
-weekEnd = ['04-12-2016','20-01-2017','21-01-2017','22-01-2017','29-01-2017','03-02-2017']
-
 allPeriod = 288
-dayToPredict = 7
-Start = "2017-01-25"
-dayStart = datetime.datetime.strptime(Start, "%Y-%m-%d")
-End = "2017-01-25"
-dayEnd = datetime.datetime.strptime(End, "%Y-%m-%d")
+dayUseToPredict = 14
 
-dayCheckStart = dayStart-datetime.timedelta(days=dayToPredict)
+predictDayStr = "2017-02-05"
+predictDate = datetime.datetime.strptime(predictDayStr, "%Y-%m-%d")
 
 table = []
 prediction = {}
@@ -21,59 +15,56 @@ prediction['predict'] = []
 csvPredict = []
 csvDate = []
 
-filename ="fqCheckinFile1FEB_4b0587fdf964a52034ab22e3"
+havePredictDay = 0
+
+def roundToTime(len):
+    if(len>0):
+        time = datetime.datetime(2000, 1, 1, 0, 0, 0)
+        len = (len-1)*5
+        
+        time = time + datetime.timedelta(minutes=len)
+        return time.strftime('%H:%M')
+    return None
+
+filename ="fqCheckinFile_5FEB_CentralWorld.1"
 
 with open(filename+'.json') as json_data:
     checkinJSON = json.load(json_data)
     CheckinList = checkinJSON['checkin']
-
-    #init 30 day table for predict
-    for i in range(dayToPredict):
-        dayCheckString = dayCheckStart.strftime("%Y-%m-%d")
-        dayGet = [_  for _ in CheckinList if _["date"] == dayCheckString]
-        if dayGet != []:
-            dayList = dayGet[0]['dense']
+    CheckinList.sort(key=lambda item:item['date'],reverse=True)
+    #init table for predict
+    for dayGet in CheckinList:  
+        dayGetDate = datetime.datetime.strptime(dayGet['date'], "%Y-%m-%d")       
+        if dayGetDate <= predictDate:
+            dayList = dayGet['dense']
+            table.insert(0, dayList)
+            if dayGetDate == predictDate:
+                havePredictDay = 1
+            if len(table) == dayUseToPredict+havePredictDay:
+                break
+    #prediction
+    if len(table) > 0+havePredictDay:           
+        predict = DensePrediction.findNextDense(table)
+        allPeriod = 288
+        last_length = len(table[-1])
+        if last_length == allPeriod:
+            table.append([predict])
         else:
-            dayList = ["-"]*allPeriod
-        table.append(dayList)
-        dayCheckStart+= datetime.timedelta(days=1)
-    
-    dayPredict = dayStart
-    
-    #allDayPediction
-    while dayPredict <= dayEnd:
-        dayPredictString = dayPredict.strftime("%Y-%m-%d")        
-        realdense = [_  for _ in CheckinList if _["date"] == dayPredictString]
-        if realdense != []:
-            dayList = realdense[0]['dense']
-        else:
-            dayList = ["-"]*allPeriod 
-        oneDayPredict = []
-        #1 day prediction
-        for i in range(allPeriod):
-            predict = DensePrediction.findNextDense(table)
-            oneDayPredict.append(predict)
-            #addRealDense
-            if len(table[-1]) == allPeriod:
-                table.append([dayList[i]])
-            else:
-                table[-1].append(dayList[i])
-        csvPredict.append(oneDayPredict)
-        csvDate.append(dayPredictString)
-        prediction['predict'].append({"date":dayPredictString,"dense":oneDayPredict})
-        dayPredict += datetime.timedelta(days=1)        
+            table[-1].append(predict)
+    else:
+        print("have not enough data to predict")
 
-#output prediction
-    with open('predict_'+filename+'.json', 'w') as outfile:
-        json.dump(prediction, outfile)
-    
-    csvRow = [list(i) for i in zip(*csvPredict)]
-    with open('predict_'+filename+'.csv', 'w', newline='') as fp:
-        a = csv.writer(fp, delimiter=',')
-        a.writerows([csvDate])
-        a.writerows(csvRow)
-    # print(csvRow)
+    predictTime = roundToTime(len(table[-1]))
+    prediction['predict'].append({"date":predictDayStr,"time":predictTime,"dense":predict}) 
 
+    print(prediction)
+    # #output prediction
+    # with open('predict_'+filename+'.json', 'w') as outfile:
+    #     json.dump(prediction, outfile)
     
-
+    # with open('predict_'+filename+'.csv', 'w') as fp:
+    #     a = csv.writer(fp, delimiter=',')
+    #     a.writerow(("",predictDayStr))
+    #     a.writerow((str(predictTime),str(predict)))
+    # # print(csvRow)
 
