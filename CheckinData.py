@@ -15,7 +15,7 @@ def getCheckinByPlace(venueid,days):
 
     todayDate = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     startDate = todayDate-datetime.timedelta(days=days-1)
-    allCheckin = fqDb.find({"venueId":venueid})
+    allCheckin = fqDb.find({"venueId":venueid}).limit(20000)
     inDaysCheckin = {}
     #pick data from 'days' before today
     for checkin in allCheckin:
