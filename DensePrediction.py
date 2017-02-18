@@ -1,6 +1,7 @@
 
 
 def findNextDense(table):
+    
     allPeriod = 288
     last_length = len(table[-1])
 
@@ -14,11 +15,10 @@ def findNextDense(table):
         next_time = current_time+1
         if table[-1][current_time] == "-":
             return table[-2][next_time]  
-    
     toFindMax = [sublist[current_time] for sublist in table]
     numberToFindMax = []
     for value in toFindMax:
-        if isinstance(value, float):
+        if isinstance(value, int):
             numberToFindMax.append(value)  
     max_value = max(numberToFindMax)
     table_len = len(table)-1  

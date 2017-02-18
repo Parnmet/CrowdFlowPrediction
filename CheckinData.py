@@ -23,16 +23,36 @@ def getCheckinByPlace(venueid,days):
         if thisDate >= startDate:
             thisDateStr = thisDate.strftime("%Y-%m-%d")
             round = timeToRound(thisDate.strftime("%H:%M"))-1
+            # if thisDate>=todayDate:
+            #     print(thisDate.strftime("%H:%M"))
+            #     print(round)
             if thisDateStr not in inDaysCheckin:
-                inDaysCheckin[thisDateStr] = []
-                inDaysCheckin[thisDateStr].insert(round,checkin['count'])
+                if thisDate < todayDate:
+                    inDaysCheckin[thisDateStr] = ["-"]*288
+                    inDaysCheckin[thisDateStr][round] = checkin['count']
+                else:
+                    # currentTime = datetime.datetime.now().strftime("%H:%M")
+                    # inDaysCheckin[thisDateStr] = ["-"]*timeToRound(currentTime)   
+                    inDaysCheckin[thisDateStr] = []     
+                    inDaysCheckin[thisDateStr].insert(round,checkin['count'])
             else:
                 try:
                     oldCount = inDaysCheckin[thisDateStr][round]
-                    inDaysCheckin[thisDateStr][round] = (oldCount+checkin['count'])/2    
+                    if oldCount == "-":
+                        inDaysCheckin[thisDateStr][round] = checkin['count']
+                    else:
+                        inDaysCheckin[thisDateStr][round] = (oldCount+checkin['count'])/2    
                 except IndexError:
                     inDaysCheckin[thisDateStr].insert(round,checkin['count'])  
-    return inDaysCheckin
- 
-# print(getCheckinByPlace("4b0587fdf964a52034ab22e3",3))
+
+    countCheckin = {}
+    countCheckin['checkin'] = []
+    for date,dense in inDaysCheckin.items():    
+        oneDay = {}
+        oneDay['date'] = date
+        oneDay['dense'] = dense
+        countCheckin['checkin'].append(oneDay)
+    return countCheckin
+
+# print(getCheckinByPlace("4b0587fdf964a52034ab22e3",2))
 # print(list(fqDb.find().sort("_id", -1).limit(1)))
