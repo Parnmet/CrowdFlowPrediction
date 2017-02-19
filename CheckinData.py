@@ -54,5 +54,32 @@ def getCheckinByPlace(venueid,days):
         countCheckin['checkin'].append(oneDay)
     return countCheckin
 
+def findMaxOfPlace(venueid):
+    return fqDb.find({"venueId":venueid}).sort("count",-1).limit(1)[0]['count']
+
+def findAllVenue():
+    allVenue = db.FQ_VENUE.find()
+    venuelist = []
+    for venue in allVenue:
+        newVenue = {}
+        newVenue['venueId'] = venue['id']
+        newVenue['name'] = venue['name']
+        newVenue['lat'] = venue['location']['lat']
+        newVenue['lng'] = venue['location']['lng']
+        venuelist.append(newVenue)
+    return venuelist
+
+def findVenueByLl(lat,lng):
+    venue = db.FQ_VENUE.find_one({"location.lat":lat})
+    if venue != None:
+        newVenue = {}
+        newVenue['venueId'] = venue['id']
+        newVenue['name'] = venue['name']
+        newVenue['lat'] = venue['location']['lat']
+        newVenue['lng'] = venue['location']['lng']
+        return newVenue
+    return None
 # print(getCheckinByPlace("4b0587fdf964a52034ab22e3",2))
 # print(list(fqDb.find().sort("_id", -1).limit(1)))
+# print(findMaxOfPlace("4b0587fdf964a52034ab22e3"))
+# print(findVenueByLl(13.74601902837004,100.53421212920541))

@@ -53,7 +53,9 @@ def predictNextDenseFromcheckin(checkinJSON):
         print("have not enough data to predict")
     
     predictTime = roundToTime(len(table[-1]))
-    prediction['predict'].append({"date":predictDayStr,"time":predictTime,"dense":predict}) 
+    prediction['date'] = predictDayStr
+    prediction['time'] = predictTime
+    prediction['dense'] = predict
 
     return prediction
 
