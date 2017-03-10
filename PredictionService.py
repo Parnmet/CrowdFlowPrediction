@@ -33,7 +33,7 @@ def getCurrentDensity(latlng):
         checkinJSON = CheckinData.getCheckinByPlace(venueId,1)
         max = CheckinData.findMaxOfPlace(venueId)
         time = datetime.datetime.now().strftime("%H:%M")
-        
+
         place.pop('venueId', None)        
         current = {}
         current['place'] =place

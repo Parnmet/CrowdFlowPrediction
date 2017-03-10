@@ -1,5 +1,3 @@
-
-
 def findNextDense(table):
     
     allPeriod = 288

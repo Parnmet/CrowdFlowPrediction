@@ -2,6 +2,7 @@
 #-*-coding: utf-8 -*-
 from flask import Flask,jsonify,request
 import PredictionService
+from random import randint
 
 app = Flask(__name__)
 
@@ -25,6 +26,19 @@ def getDensity():
 def getAllPlace():
     return jsonify(PredictionService.allPlace())
 
+@app.route('/crowdflow/random',methods=['GET'])
+def getRand():
+    den = ["LOW","HIGH","MEDIUM"]
+    num = randint(0,2)    
+    density = {}
+    density['density'] = []
+    d = {}
+    d['density'] = den[num]
+    density['density'].append(d)
+    # print(density)
+    return jsonify(density)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5050)
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(threaded=True)

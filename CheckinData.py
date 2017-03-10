@@ -4,6 +4,7 @@ import datetime
 client = MongoClient("10.0.1.3")
 db = client.SocialData
 fqDb = db.FQ_CHECKIN
+db2 = client.Predict
 
 def timeToRound(timeStr):
     #time format HH:MM
@@ -15,17 +16,23 @@ def getCheckinByPlace(venueid,days):
 
     todayDate = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     startDate = todayDate-datetime.timedelta(days=days-1)
-    allCheckin = fqDb.find({"venueId":venueid}).limit(20000)
+    allCheckin = fqDb.find({"venueId":venueid}).sort("_id",-1).limit(10000)
+    # print(startDate)
     inDaysCheckin = {}
     #pick data from 'days' before today
     for checkin in allCheckin:
         thisDate = datetime.datetime.strptime(checkin['datetime'],"%a %b %d %Y %H:%M:%S GMT+0700 (%Z)")
+        # print(thisDate)
         if thisDate >= startDate:
+            # print(thisDate)
             thisDateStr = thisDate.strftime("%Y-%m-%d")
             round = timeToRound(thisDate.strftime("%H:%M"))-1
+            
+            # print(round)
             # if thisDate>=todayDate:
-            #     print(thisDate.strftime("%H:%M"))
-            #     print(round)
+            #     if(round>20):
+            #         print(thisDate.strftime("%H:%M"))
+                # print(round)
             if thisDateStr not in inDaysCheckin:
                 if thisDate < todayDate:
                     inDaysCheckin[thisDateStr] = ["-"]*288
@@ -33,7 +40,8 @@ def getCheckinByPlace(venueid,days):
                 else:
                     # currentTime = datetime.datetime.now().strftime("%H:%M")
                     # inDaysCheckin[thisDateStr] = ["-"]*timeToRound(currentTime)   
-                    inDaysCheckin[thisDateStr] = []     
+                    # print(timeToRound(datetime.datetime.now().strftime("%H:%M")))
+                    inDaysCheckin[thisDateStr] = ["-"]*(timeToRound(datetime.datetime.now().strftime("%H:%M"))-1)     
                     inDaysCheckin[thisDateStr].insert(round,checkin['count'])
             else:
                 try:
@@ -44,7 +52,8 @@ def getCheckinByPlace(venueid,days):
                         inDaysCheckin[thisDateStr][round] = (oldCount+checkin['count'])/2    
                 except IndexError:
                     inDaysCheckin[thisDateStr].insert(round,checkin['count'])  
-
+    # for day in inDaysCheckin:
+    #     print(len(inDaysCheckin[day]))
     countCheckin = {}
     countCheckin['checkin'] = []
     for date,dense in inDaysCheckin.items():    
@@ -83,3 +92,18 @@ def findVenueByLl(lat,lng):
 # print(list(fqDb.find().sort("_id", -1).limit(1)))
 # print(findMaxOfPlace("4b0587fdf964a52034ab22e3"))
 # print(findVenueByLl(13.74601902837004,100.53421212920541))
+
+def savePredictCheckin(predict):
+    # print(predict)
+    # print(db2.DENSE_FQCHECKIN.count())
+    db2.DENSE_FQCHECKIN.insert_one(predict)
+
+def findPredictByPlace(lat,lng):
+    return db2.DENSE_FQCHECKIN.find({"place.lat":lat,"place.lng":lng})
+
+def getLastPredictByPlace(lat,lng):
+    last = findPredictByPlace(lat,lng).sort("date",-1).sort("time",-1).limit(1)
+    for l in last:
+        return l
+    return None
+    
