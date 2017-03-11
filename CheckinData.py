@@ -93,6 +93,12 @@ def findVenueByLl(lat,lng):
 # print(findMaxOfPlace("4b0587fdf964a52034ab22e3"))
 # print(findVenueByLl(13.74601902837004,100.53421212920541))
 
+def findInRadiusVenue(minLat,maxLat,minLng,maxLng):
+    return db.FQ_VENUE.find({
+        "location.lat": {"$gte": minLat,"$lte": maxLat},
+        "location.lng": {"$gte": minLng,"$lte": maxLng}
+        })    
+
 def savePredictCheckin(predict):
     # print(predict)
     # print(db2.DENSE_FQCHECKIN.count())
