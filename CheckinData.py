@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 import datetime
+import DenseTableFqCheckin
 
 client = MongoClient("10.0.1.3")
 db = client.SocialData
@@ -11,6 +12,20 @@ def timeToRound(timeStr):
     time = timeStr.split(":")
     secs = ((int(time[0])*60+int(time[1]))/5)+1
     return secs
+
+def findNextDateTime():
+    dateNow = datetime.datetime.now()
+    round = timeToRound(dateNow.strftime("%H:%M"))
+    dateNext = None
+    if round+1>288:
+        round=1
+        dateNext = dateNow+ datetime.timedelta(days=1)
+    else:
+        round+=1 
+        dateNext = dateNow.replace(hour=0, minute=0, second=0, microsecond=0)   
+    len = (round-1)*5
+    dateNext = dateNext + datetime.timedelta(minutes=len)
+    return dateNext
 
 def getCheckinByPlace(venueid,days):
 
@@ -107,9 +122,10 @@ def savePredictCheckin(predict):
 def findPredictByPlace(lat,lng):
     return db2.DENSE_FQCHECKIN.find({"place.lat":lat,"place.lng":lng})
 
-def getLastPredictByPlace(lat,lng):
-    last = findPredictByPlace(lat,lng).sort("date",-1).sort("time",-1).limit(1)
-    for l in last:
-        return l
-    return None
+def getCurrentPredictByPlace(lat,lng):
+    dateNext = findNextDateTime()
+    last = db2.DENSE_FQCHECKIN.find_one({"place.lat":lat,"place.lng":lng,"date":dateNext.strftime("%Y-%m-%d"),"time":dateNext.strftime("%H:%M")})
+    # for l in last:
+    return last
+    # return None
     
