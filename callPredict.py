@@ -12,13 +12,12 @@ def job():
     for place in allPlace:
         latlng = repr(place['lat'])+","+repr(place['lng'])
         # print(latlng)
-        den = PredictionService.getNextDensity(latlng)
+        predict = PredictionService.getNextPredictCheckinNumber(latlng)
         # print(den)
-        predict = den['density'][0] 
         # jsonPredict = json.dumps(predict)   
         CheckinData.savePredictCheckin(predict)
 
-schedule.every(3).minutes.do(job)
+schedule.every(1).minutes.do(job)
 # schedule.every().hour.do(job)
 # schedule.every().day.at("10:30").do(job)
 

@@ -73,6 +73,22 @@ def findDenseLevel(max,count):
             return "HIGH"
     return "LOW"
 
+
+def getNextPredictCheckinNumber(latlng):
+    place = findPlace(latlng)
+    dense = {}
+    if place != None:
+        venueId = place['venueId']
+        checkinJSON = CheckinData.getCheckinByPlace(venueId,DenseTableFqCheckin.dayUseToPredict+1)
+        prediction = DenseTableFqCheckin.predictNextDenseFromcheckin(checkinJSON)
+        place.pop('venueId', None) 
+        dense['place'] =place
+        dense['time'] = prediction['time']
+        dense['date'] = prediction['date']
+        dense['density'] = prediction['dense']
+        # print(prediction['dense'])
+        # print("next 5 min: "+str(checkinJSON['checkin'][0]['dense'][-1]))
+    return dense
 # print(getNextDensity(""))
 # print(getCurrentDensity(""))
 # print(allVenue())
