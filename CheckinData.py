@@ -27,6 +27,18 @@ def findNextDateTime():
     dateNext = dateNext + datetime.timedelta(minutes=len)
     return dateNext
 
+def findCurrentDateTimeRange():
+    rangeDatetime = []
+    dateNow = datetime.datetime.now()
+    # print(dateNow)
+    round = timeToRound(dateNow.strftime("%H:%M")) 
+    dateStart = dateNow.replace(hour=0, minute=0, second=0, microsecond=0)   
+    len = (round-1)*5
+    dateStart = dateStart + datetime.timedelta(minutes=len)
+    rangeDatetime.append(dateStart)
+    rangeDatetime.append(dateStart + datetime.timedelta(minutes=4))
+    return rangeDatetime
+
 def getCheckinByPlace(venueid,days):
 
     todayDate = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -103,6 +115,23 @@ def findVenueByLl(lat,lng):
         newVenue['lng'] = venue['location']['lng']
         return newVenue
     return None
+
+def getCurrentCheckinByPlace(venueid):
+    rangeDatetime = findCurrentDateTimeRange()
+    allCheckin = fqDb.find({"venueId":venueid}).sort("_id",-1).limit(1000)
+    inTimeCheckins = []
+    for checkin in allCheckin:
+        thisDate = datetime.datetime.strptime(checkin['datetime'],"%a %b %d %Y %H:%M:%S GMT+0700 (%Z)")
+        if(thisDate>=rangeDatetime[0] and thisDate<=rangeDatetime[1]):     
+            # print(checkin)
+            inTimeCheckins.append(checkin)
+    avgCheckin = {}
+    for inTimeCheckin in inTimeCheckins:
+        if not (avgCheckin):
+            avgCheckin = inTimeCheckin
+        else:
+            avgCheckin['count']= (avgCheckin['count']+inTimeCheckin['count'])/2
+    return avgCheckin
 # print(getCheckinByPlace("4b0587fdf964a52034ab22e3",2))
 # print(list(fqDb.find().sort("_id", -1).limit(1)))
 # print(findMaxOfPlace("4b0587fdf964a52034ab22e3"))

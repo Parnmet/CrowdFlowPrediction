@@ -2,6 +2,7 @@
 #-*-coding: utf-8 -*-
 from flask import Flask,jsonify,request
 import PredictionService
+import FlowPrediction
 from random import randint
 
 app = Flask(__name__)
@@ -37,6 +38,19 @@ def getRand():
     density['density'].append(d)
     # print(density)
     return jsonify(density)
+
+@app.route('/crowdflow/flow',methods=['GET'])
+def getFlow():
+    den = {}
+    if 'time' in request.args:
+        if request.args.get('time') == "5MIN":
+            den = FlowPrediction.getFlowPrediction(request.args.get('ll'))
+        else:
+            den['Error'] = "Wrong'time' : "+request.args.get('time')
+            
+    else:
+        den['Error'] = "NO 'time'"
+    return jsonify(den)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5050)
