@@ -5,6 +5,7 @@ import schedule
 import time
 import datetime
 import json
+import FlowPrediction
 
 def job():
     print(datetime.datetime.now().strftime("%H:%M"))
@@ -17,7 +18,13 @@ def job():
         # jsonPredict = json.dumps(predict)   
         CheckinData.savePredictCheckin(predict)
 
+def flow():
+    predicts = FlowPrediction.getFlowPrediction(None)
+    for predict in predicts['crowdFlow']:
+        CheckinData.savePredictFlow(predict)
 schedule.every(1).minutes.do(job)
+schedule.every(3).minutes.do(flow)
+
 # schedule.every().hour.do(job)
 # schedule.every().day.at("10:30").do(job)
 

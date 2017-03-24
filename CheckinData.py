@@ -158,3 +158,7 @@ def getCurrentPredictByPlace(lat,lng):
     return last
     # return None
     
+def savePredictFlow(predict):
+    # print(predict)
+    # print(db2.DENSE_FQCHECKIN.count())
+    db2.FLOW_FQCHECKIN.insert_one(predict)

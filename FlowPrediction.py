@@ -5,7 +5,7 @@ import PredictionService
 def findPlace(latlng):
     ll = latlng.split(",")
     foundPlace = CheckinData.findVenueByLl(float(ll[0]),float(ll[1]))
-    print(foundPlace)
+    # print(foundPlace)
     return foundPlace
 
 def sortByDifference(allPlace):
@@ -15,12 +15,16 @@ def sortByDifference(allPlace):
         # print("-")
         # print(next1)
         # print(now1)
-        place['date'] = next1['date']
-        place['time'] = next1['time']
+        
         if(next1 and now1 and next1['density'] != "-" and now1['count'] != "-" ):
             place['dif'] = int(next1['density']) - int(now1['count'])
+            place['date'] = next1['date']
+            place['time'] = next1['time']
         else:
             place['dif'] = 0
+            place['date'] = "-"
+            place['time'] = "-"
+            
     sortedPlace = sorted(allPlace, key=lambda k: k['dif'])
     return sortedPlace 
 
@@ -31,7 +35,7 @@ def getFlowPrediction(ll):
         allPlace = [findPlace(ll)]
     else:
         allPlace = CheckinData.findAllVenue()
-    print(allPlace)
+    # print(allPlace)
     if allPlace != None and allPlace[0] != None:
         sortedPlaces = sortByDifference(allPlace)
     else:
@@ -75,10 +79,17 @@ def getFlowPrediction(ll):
                 target = place['dif']*-1
                 print(target)
                 stock2 = []
-                for n, i in enumerate(stock):
+                for n, i in enumerate(nearbyPlace):
                     stock2.append((abs(i["dif"]-target), i["distance"], n))
 
-                closetPlace = stock[sorted(stock2)[0][2]]
+                closetPlace = nearbyPlace[sorted(stock2)[0][2]]
+                foundPlace = [elem for elem in sortedPlaces if elem['venueId'] == closetPlace['venueId']]
+                print("found")
+                print(foundPlace)
+                print("sort")
+                foundPlace[0]['dif'] += int(place['dif'])
+                print(sortedPlaces)
+
                 nextPlace['lat'] = closetPlace['lat']
                 nextPlace['lng'] = closetPlace['lng']
                 nextPlace['name'] = closetPlace['name']
@@ -88,6 +99,7 @@ def getFlowPrediction(ll):
 
         predictions['crowdFlow'].append(predict)
         
+    print("prediction: ")
     print(predictions)
     return predictions
     
