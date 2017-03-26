@@ -42,8 +42,8 @@ def getFlowPrediction(ll):
         return {"crowdFlow":[]}
     # (- place)    
     # negativePlaces = [elem for elem in sortedPlaces if elem['dif'] <0]
-    print(sortedPlaces)    
-    print("===")
+    # print(sortedPlaces)    
+    # print("===")
     predictions ={}
     predictions['crowdFlow'] = []
     for place in sortedPlaces:
@@ -54,17 +54,17 @@ def getFlowPrediction(ll):
         predict['place']['name'] = place['name']        
         predict['date'] = place['date']
         predict['time'] = place['time']
-        predict['nextPlace'] =[]
+        predict['nextPlace'] =["None"]
         
         if place['dif'] <0:  
-            print("-----")
-            print("place : ")
-            print(place)
+            # print("-----")
+            # print("place : ")
+            # print(place)
             #getPlaceinRadius
             inRadiusPlaces = LocationDistance.findPlaceInRadius(place['lat'],place['lng'],radius)
             #filter place in R from sortedPlaces (+ place in R)
             inRVenueIds = [d['venueId'] for d in inRadiusPlaces]
-            print("nearby :")
+            # print("nearby :")
             nearbyPlace = list(filter(lambda d: d['venueId'] in inRVenueIds, sortedPlaces))
             nearbyPlace = [elem for elem in nearbyPlace if elem['dif'] > 0]
             #add distance for all nearby place
@@ -72,35 +72,43 @@ def getFlowPrediction(ll):
                 nearby['distance'] = LocationDistance.findDistance(place['lat'],place['lng'],nearby['lat'],nearby['lng'])
             #sort nearby place ASC 
             # sortedNearbyPlace = sorted(nearbyPlace, key=lambda k: k['dif'],reverse=True)
-            print(nearbyPlace)
+            # print(nearbyPlace)
             #findClosetNumber
             if len(nearbyPlace)>0:
+                predict['nextPlace']=[]
                 nextPlace = {}
                 target = place['dif']*-1
-                print(target)
+                # print(target)
                 stock2 = []
                 for n, i in enumerate(nearbyPlace):
                     stock2.append((abs(i["dif"]-target), i["distance"], n))
 
                 closetPlace = nearbyPlace[sorted(stock2)[0][2]]
                 foundPlace = [elem for elem in sortedPlaces if elem['venueId'] == closetPlace['venueId']]
-                print("found")
-                print(foundPlace)
-                print("sort")
-                foundPlace[0]['dif'] += int(place['dif'])
-                print(sortedPlaces)
-
+                # print("found")
+                # print(foundPlace)
+                # print("sort")
+                if foundPlace[0]['dif'] >= place['dif']:
+                    foundPlace[0]['dif'] += int(place['dif'])
+                    place['dif'] -= place['dif']
+                else:
+                    foundPlace[0]['dif'] = 0
+                    place['dif'] += foundPlace[0]['dif'] 
+                # print(sortedPlaces)
+                
                 nextPlace['lat'] = closetPlace['lat']
                 nextPlace['lng'] = closetPlace['lng']
                 nextPlace['name'] = closetPlace['name']
                 nextPlace['order'] = 1
+                predict['nextPlace']=[]
+                
                 predict['nextPlace'].append(nextPlace)
-                print(nextPlace)
+                # print(nextPlace)
 
         predictions['crowdFlow'].append(predict)
         
-    print("prediction: ")
-    print(predictions)
+    # print("prediction: ")
+    # print(predictions)
     return predictions
     
 
