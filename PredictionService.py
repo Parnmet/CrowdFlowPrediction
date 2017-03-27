@@ -44,7 +44,7 @@ def getCurrentDensity(latlng):
         print("now: "+str(checkinJSON['checkin'][0]['dense'][-1]))
     return dense
 
-def getNextDensity(latlng):
+def getNextDensity(latlng,predictTime):
     place = findPlace(latlng)
     dense = {}
     dense['density']=[]
@@ -52,7 +52,7 @@ def getNextDensity(latlng):
         venueId = place['venueId']
         max = CheckinData.findMaxOfPlace(venueId)    
         checkinJSON = CheckinData.getCheckinByPlace(venueId,DenseTableFqCheckin.dayUseToPredict+1)
-        prediction = DenseTableFqCheckin.predictNextDenseFromcheckin(checkinJSON)
+        prediction = DenseTableFqCheckin.predictNextDenseFromcheckin(checkinJSON,predictTime)
         place.pop('venueId', None) 
         next = {}
         next['place'] =place
@@ -60,7 +60,7 @@ def getNextDensity(latlng):
         next['date'] = prediction['date']
         next['density'] = findDenseLevel(max,prediction['dense'])  
         dense['density'].append(next)
-        print("next 5 min: "+str(checkinJSON['checkin'][0]['dense'][-1]))
+        print("next"+str(predictTime)+"min: "+str(checkinJSON['checkin'][0]['dense'][-1]))
     return dense
 def findDenseLevel(max,count):
     if count != "-":
@@ -74,13 +74,13 @@ def findDenseLevel(max,count):
     return "LOW"
 
 
-def getNextPredictCheckinNumber(latlng):
+def getNextPredictCheckinNumber(latlng,predictTime):
     place = findPlace(latlng)
     dense = {}
     if place != None:
         venueId = place['venueId']
         checkinJSON = CheckinData.getCheckinByPlace(venueId,DenseTableFqCheckin.dayUseToPredict+1)
-        prediction = DenseTableFqCheckin.predictNextDenseFromcheckin(checkinJSON)
+        prediction = DenseTableFqCheckin.predictNextDenseFromcheckin(checkinJSON,predictTime)
         place.pop('venueId', None) 
         dense['place'] =place
         dense['time'] = prediction['time']

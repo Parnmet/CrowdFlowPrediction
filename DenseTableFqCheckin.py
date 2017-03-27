@@ -15,7 +15,10 @@ def roundToTime(len):
         return time.strftime('%H:%M')
     return None
 
-def predictNextDenseFromcheckin(checkinJSON):
+def predictNextDenseFromcheckin(checkinJSON,predictTime):
+
+    # predictTime = 5 
+    nextSlice = predictTime/5
 
     predictDate = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     predictDayStr = predictDate.strftime("%Y-%m-%d")
@@ -42,17 +45,17 @@ def predictNextDenseFromcheckin(checkinJSON):
                 break
     #prediction
     if len(table) > 0+havePredictDay:       
-        predict = DensePrediction.findNextDense(table)
-        allPeriod = 288
-        last_length = len(table[-1])
-        if last_length == allPeriod:
-            table.append([predict])
-        else:
-            table[-1].append(predict)
+        predict = DensePrediction.findNextDense(table,nextSlice)
+        print("eee")
+        print(predict)
+        #####change to not append in table and can select time
+        next_time = len(table[-1])+nextSlice
+        if next_time > allPeriod-1:
+            next_time-= allPeriod-1    
     else:
         print("have not enough data to predict")
     
-    predictTime = roundToTime(len(table[-1]))
+    predictTime = roundToTime(next_time)
     prediction['date'] = predictDayStr
     prediction['time'] = predictTime
     prediction['dense'] = predict
