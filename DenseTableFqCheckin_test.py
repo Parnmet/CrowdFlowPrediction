@@ -22,7 +22,7 @@ prediction['predict'] = []
 csvPredict = []
 csvDate = []
 
-filename ="fqCheckinFile18FEB_MBK"
+filename ="fqCheckin27MAR_siamDis"
 
 with open(filename+'.json') as json_data:
     checkinJSON = json.load(json_data)
@@ -75,8 +75,9 @@ with open(filename+'.json') as json_data:
                 oneDayPredict.append(dayList[i]) 
                 table[-1].append(dayList[i])                               
             else:                    
-                if dayList[i] != "-":             
-                    predict = DensePrediction.findNextDense(table)
+                if dayList[i] != "-":
+                    # print(table)             
+                    predict = DensePrediction.findNextDense(table,15)
                     oneDayPredict.append(predict)
                 else:        
                     oneDayPredict.append("-")

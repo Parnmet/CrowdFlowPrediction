@@ -39,11 +39,23 @@ def findCurrentDateTimeRange():
     rangeDatetime.append(dateStart + datetime.timedelta(minutes=4))
     return rangeDatetime
 
+def findPreviousDateTimeRange():
+    rangeDatetime = []
+    dateNow = datetime.datetime.now()
+    # print(dateNow)
+    round = timeToRound(dateNow.strftime("%H:%M")) 
+    dateStart = dateNow.replace(hour=0, minute=0, second=0, microsecond=0)   
+    len = (round-2)*5
+    dateStart = dateStart + datetime.timedelta(minutes=len)
+    rangeDatetime.append(dateStart)
+    rangeDatetime.append(dateStart + datetime.timedelta(minutes=4))
+    return rangeDatetime
+
 def getCheckinByPlace(venueid,days):
 
     todayDate = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     startDate = todayDate-datetime.timedelta(days=days-1)
-    allCheckin = fqDb.find({"venueId":venueid}).sort("_id",-1).limit(10000)
+    allCheckin = fqDb.find({"venueId":venueid}).sort("_id",-1).limit(20500)
     # print(startDate)
     inDaysCheckin = {}
     #pick data from 'days' before today
@@ -131,11 +143,26 @@ def getCurrentCheckinByPlace(venueid):
             avgCheckin = inTimeCheckin
         else:
             avgCheckin['count']= (avgCheckin['count']+inTimeCheckin['count'])/2
+    avgCheckin['date'] = rangeDatetime[0].strftime("%Y-%m-%d")
+    avgCheckin['time'] = rangeDatetime[0].strftime("%H:%M")
     return avgCheckin
-# print(getCheckinByPlace("4b0587fdf964a52034ab22e3",2))
-# print(list(fqDb.find().sort("_id", -1).limit(1)))
-# print(findMaxOfPlace("4b0587fdf964a52034ab22e3"))
-# print(findVenueByLl(13.74601902837004,100.53421212920541))
+
+def getPreviousCheckinByPlace(venueid):
+    rangeDatetime = findPreviousDateTimeRange()
+    allCheckin = fqDb.find({"venueId":venueid}).sort("_id",-1).limit(1000)
+    inTimeCheckins = []
+    for checkin in allCheckin:
+        thisDate = datetime.datetime.strptime(checkin['datetime'],"%a %b %d %Y %H:%M:%S GMT+0700 (%Z)")
+        if(thisDate>=rangeDatetime[0] and thisDate<=rangeDatetime[1]):     
+            # print(checkin)
+            inTimeCheckins.append(checkin)
+    avgCheckin = {}
+    for inTimeCheckin in inTimeCheckins:
+        if not (avgCheckin):
+            avgCheckin = inTimeCheckin
+        else:
+            avgCheckin['count']= (avgCheckin['count']+inTimeCheckin['count'])/2
+    return avgCheckin
 
 def findInRadiusVenue(minLat,maxLat,minLng,maxLng):
     return db.FQ_VENUE.find({
@@ -143,6 +170,7 @@ def findInRadiusVenue(minLat,maxLat,minLng,maxLng):
         "location.lng": {"$gte": minLng,"$lte": maxLng}
         })    
 
+#####predict table
 def savePredictCheckin(predict):
     # print(predict)
     # print(db2.DENSE_FQCHECKIN.count())

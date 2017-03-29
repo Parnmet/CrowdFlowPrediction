@@ -15,8 +15,9 @@ def findNextDense(table,nextSlice):
     else:
         if table[-1][current_time] == "-":
             return table[-2][next_time]  
-
+    
     toFindMax = [sublist[current_time] for sublist in table]
+    # print(toFindMax)
     numberToFindMax = []
     for value in toFindMax:
         if isinstance(value, int):

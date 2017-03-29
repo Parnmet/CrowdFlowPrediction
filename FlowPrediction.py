@@ -28,22 +28,10 @@ def sortByDifference(allPlace):
     sortedPlace = sorted(allPlace, key=lambda k: k['dif'])
     return sortedPlace 
 
-def getFlowPrediction(ll):
+    
+def getFlowPrediction(sortedPlaces):
     radius = 0.4 #km
-    allPlace = None
-    if ll:
-        allPlace = [findPlace(ll)]
-    else:
-        allPlace = CheckinData.findAllVenue()
-    # print(allPlace)
-    if allPlace != None and allPlace[0] != None:
-        sortedPlaces = sortByDifference(allPlace)
-    else:
-        return {"crowdFlow":[]}
-    # (- place)    
-    # negativePlaces = [elem for elem in sortedPlaces if elem['dif'] <0]
-    # print(sortedPlaces)    
-    # print("===")
+    
     predictions ={}
     predictions['crowdFlow'] = []
     for place in sortedPlaces:
@@ -56,10 +44,7 @@ def getFlowPrediction(ll):
         predict['time'] = place['time']
         predict['nextPlace'] =["None"]
         
-        if place['dif'] <0:  
-            # print("-----")
-            # print("place : ")
-            # print(place)
+        if place['dif'] <0:
             #getPlaceinRadius
             inRadiusPlaces = LocationDistance.findPlaceInRadius(place['lat'],place['lng'],radius)
             #filter place in R from sortedPlaces (+ place in R)
@@ -110,5 +95,4 @@ def getFlowPrediction(ll):
     # print("prediction: ")
     # print(predictions)
     return predictions
-    
 

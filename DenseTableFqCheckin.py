@@ -46,8 +46,8 @@ def predictNextDenseFromcheckin(checkinJSON,predictTime):
     #prediction
     if len(table) > 0+havePredictDay:       
         predict = DensePrediction.findNextDense(table,nextSlice)
-        print("eee")
-        print(predict)
+        # print("eee")
+        # print(predict)
         #####change to not append in table and can select time
         next_time = len(table[-1])+nextSlice
         if next_time > allPeriod-1:

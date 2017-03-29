@@ -4,19 +4,26 @@ import CheckinData
 import DenseTableFqCheckin
 import datetime
 import math
+import FlowPrediction
 
+ladkrabang = ['4df8d001814dd2985fdd35d8','4bf774814a67c9288ec623cf','4bb9a4a198c7ef3b61373202','4af833a6f964a5205a0b22e3','4c034d0cf56c2d7fa6c71c66']
 
 def allVenue():
     place = CheckinData.findAllVenue()
-    return place
+    places = []
+    for p in place:
+        if(p['venueId'] not in ladkrabang):
+            places.append(p)
+    return places
 
 def allPlace():
     place = allVenue()
     allplace = {}
     allplace['places'] = []
     for p in place:
-        p.pop('venueId', None)
-        allplace['places'].append(p)
+        if(p['venueId'] not in ladkrabang):
+            p.pop('venueId', None)
+            allplace['places'].append(p)
     return allplace
 
 def findPlace(latlng):
@@ -62,6 +69,7 @@ def getNextDensity(latlng,predictTime):
         dense['density'].append(next)
         print("next"+str(predictTime)+"min: "+str(checkinJSON['checkin'][0]['dense'][-1]))
     return dense
+
 def findDenseLevel(max,count):
     if count != "-":
         range = math.ceil(((1.0+max)/3))
@@ -72,7 +80,6 @@ def findDenseLevel(max,count):
         else:
             return "HIGH"
     return "LOW"
-
 
 def getNextPredictCheckinNumber(latlng,predictTime):
     place = findPlace(latlng)
@@ -89,7 +96,56 @@ def getNextPredictCheckinNumber(latlng,predictTime):
         # print(prediction['dense'])
         # print("next 5 min: "+str(checkinJSON['checkin'][0]['dense'][-1]))
     return dense
-# print(getNextDensity(""))
-# print(getCurrentDensity(""))
-# print(allVenue())
-# print( findPlace("13.74601902837004,100.53435495832393"))
+
+def getCurrentFlow(latlng):
+    allPlace = None
+    if latlng:
+        allPlace = [findPlace(latlng)]
+    else:
+        allPlace = allVenue()
+    # print(allPlace)
+    if allPlace != None and allPlace[0] != None:
+        for place in allPlace:
+            next1 = CheckinData.getCurrentCheckinByPlace(place['venueId'])
+            now1 = CheckinData.getPreviousCheckinByPlace(place['venueId'])
+            if(next1 and now1 and next1['count'] != "-" and now1['count'] != "-" ):
+                place['dif'] = int(next1['count']) - int(now1['count'])
+                place['date'] = next1['date']
+                place['time'] = next1['time']
+            else:
+                place['dif'] = 0
+                place['date'] = "-"
+                place['time'] = "-"
+                
+        sortedPlace = sorted(allPlace, key=lambda k: k['dif'])
+        return FlowPrediction.getFlowPrediction(sortedPlace)
+    else:
+        return {"crowdFlow":[]}
+
+def getNextFlow(latlng,predictTime):
+    allPlace = None
+    if latlng:
+        allPlace = [findPlace(latlng)]
+    else:
+        allPlace = allVenue()
+    # print(allPlace)
+    if allPlace != None and allPlace[0] != None:
+        for place in allPlace:
+            now1 = CheckinData.getCurrentCheckinByPlace(place['venueId'])
+            next1 = getNextPredictCheckinNumber(repr(place['lat'])+","+repr(place['lng']),predictTime)
+            # print(now1)
+            # print(next1)
+            if(next1 and now1 and next1['density'] != "-" and now1['count'] != "-" ):
+                place['dif'] = int(next1['density']) - int(now1['count'])
+                place['date'] = next1['date']
+                place['time'] = next1['time']
+            else:
+                place['dif'] = 0
+                place['date'] = "-"
+                place['time'] = "-"
+                
+        sortedPlace = sorted(allPlace, key=lambda k: k['dif'])
+        return FlowPrediction.getFlowPrediction(sortedPlace)
+    else:
+        return {"crowdFlow":[]}
+    
